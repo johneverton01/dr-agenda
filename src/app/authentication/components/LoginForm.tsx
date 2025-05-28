@@ -10,8 +10,12 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -24,6 +28,7 @@ const loginSchema = z.object({
 });
 
 export function LoginForm() {
+  const router = useRouter();
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -35,8 +40,25 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof loginSchema>) {
-    console.log("Form submitted with data:", data);
+  function isLoading() {
+    return loginForm.formState.isSubmitting;
+  }
+
+  async function onSubmit(data: z.infer<typeof loginSchema>) {
+    await authClient.signIn.email({
+      email: data.email,
+      password: data.password,
+    }, {
+      onSuccess: () => {
+        loginForm.reset();
+        router.push("/dashboard");
+      },
+      onError: () => {
+        toast.error('E-mail ou senha inválidos', {
+          description: 'Verifique suas credenciais e tente novamente.',
+        });
+      },
+    });
   }
 
   return (
@@ -50,7 +72,12 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>E-mail: </FormLabel>
               <FormControl>
-                <Input type="email" placeholder="E-mail" {...field} />
+                <Input
+                  disabled={ isLoading() }
+                  type="email"
+                  placeholder="E-mail"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>    
@@ -63,7 +90,12 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Password </FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Senha" {...field} />
+                <Input 
+                  disabled={ isLoading() }
+                  type="password"
+                  placeholder="Senha"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>    
@@ -71,8 +103,14 @@ export function LoginForm() {
         />
       </CardContent>
       <CardFooter className="flex justify-end mt-4 gap-2">
-        <Button type="submit" className="w-full">
-          Entrar
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={ isLoading() }
+          >
+          {isLoading() ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : "Entrar"}
         </Button>
       </CardFooter>
       </form>
