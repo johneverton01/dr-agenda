@@ -1,33 +1,31 @@
-import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Image from "next/image";
+import { LoginForm } from "./components/LoginForm";
 import { RegisterForm } from "./components/RegisterForm";
 
 export default function AuthenticationPage() {
   return (
     <div className="flex h-screen w-screen items-center justify-center">
+      <div className="flex flex-col items-center justify-center gap-6">
+      <Image src="/logo.svg" alt="Dr agenda" width={100} height={100} />
       <Tabs defaultValue="login" className="w-[400px]">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="login">Login</TabsTrigger>
           <TabsTrigger value="register">Criar Conta</TabsTrigger>
         </TabsList>
         <TabsContent value="login">
-          <Card>
+          <Card className="gap-3">
             <CardHeader>
               <CardTitle>Login</CardTitle>
               <CardDescription>Faça login para continuar.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2"></CardContent>
-            <CardFooter>
-              <Button>Save changes</Button>
-            </CardFooter>
+            <LoginForm />
           </Card>
         </TabsContent>
         <TabsContent value="register">
@@ -40,6 +38,7 @@ export default function AuthenticationPage() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }
