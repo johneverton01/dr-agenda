@@ -10,7 +10,10 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -25,6 +28,7 @@ const registerSchema = z.object({
 });
 
 export function RegisterForm() {
+  const router = useRouter();
   const registerForm = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -37,8 +41,28 @@ export function RegisterForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof registerSchema>) {
-    console.log("Form submitted with data:", data);
+  function resetForm() {
+    registerForm.reset();
+  }
+
+  function IsFormDisabled() {
+    return registerForm.formState.isSubmitting;
+  }
+
+  async function onSubmit(data: z.infer<typeof registerSchema>) {
+   await authClient.signUp.email({
+      email: data.email,
+      password: data.password,
+      name: data.name,
+    }, {
+      onSuccess: () => {
+        resetForm();
+        router.push("/dashboard");
+      },
+      onError: (error) => {
+        console.error("Error during registration:", error);
+      }
+    })
   }
 
   return (
@@ -85,9 +109,26 @@ export function RegisterForm() {
           )}
         />
       </CardContent>
-      <CardFooter className="flex justify-end mt-4 gap-2">
-        <Button type="submit" className="w-full">
-          Criar Conta
+      <CardFooter className="flex flex-col mt-4 gap-2">
+        <Button
+          className="w-full"
+          disabled={IsFormDisabled()}
+          type="button"
+          variant="outline"
+          onClick={resetForm}
+        >
+          Cancelar
+        </Button>
+        <Button
+          className="w-full"
+          type="submit"
+          disabled={IsFormDisabled()}
+        >
+          { IsFormDisabled() ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            "Criar Conta"
+          )}
         </Button>
       </CardFooter>
       </form>
