@@ -15,6 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -59,8 +60,16 @@ export function RegisterForm() {
         resetForm();
         router.push("/dashboard");
       },
-      onError: (error) => {
-        console.error("Error during registration:", error);
+      onError: (ctx) => {
+        if (ctx.error.code === "USER_ALREADY_EXISTS") {
+          toast.error("E-mail já cadastrado", {
+            description: "Já existe uma conta com este e-mail. Tente fazer login.",
+          });
+          return
+        }
+        toast.error("Erro ao criar conta", {
+          description: "Ocorreu um erro ao tentar criar sua conta. Tente novamente mais tarde.",
+        });
       }
     })
   }
