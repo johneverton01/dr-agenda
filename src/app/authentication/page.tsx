@@ -5,11 +5,21 @@ import {
   CardTitle
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { LoginForm } from "./components/LoginForm";
 import { RegisterForm } from "./components/RegisterForm";
 
-export default function AuthenticationPage() {
+export default async function AuthenticationPage() {
+  const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+  
+    if (session) {
+      redirect("/dashboard");
+    }
   return (
     <div className="flex h-screen w-screen items-center justify-center">
       <div className="flex flex-col items-center justify-center gap-6">
