@@ -1,3 +1,4 @@
+import { DashboardController } from "@/controllers/DashboardController";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -10,6 +11,11 @@ export default async function DashboardPage() {
 
   if (!session) {
     redirect("/authentication");
+  }
+
+  const clinics = await DashboardController().getClinicByUsers(session.user.id);
+  if (clinics.length === 0) {
+    redirect("clinic-form")
   }
  
   return (
