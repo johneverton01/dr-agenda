@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -44,7 +45,7 @@ export function LoginForm() {
     return loginForm.formState.isSubmitting;
   }
 
-  async function onSubmit(data: z.infer<typeof loginSchema>) {
+  async function handleSubmit(data: z.infer<typeof loginSchema>) {
     await authClient.signIn.email({
       email: data.email,
       password: data.password,
@@ -61,9 +62,16 @@ export function LoginForm() {
     });
   }
 
+  async function handleGoogleSignIn() {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/dashboard",
+    });
+  }
+
   return (
     <Form {...loginForm}>
-      <form onSubmit={loginForm.handleSubmit(onSubmit)}>
+      <form onSubmit={loginForm.handleSubmit(handleSubmit)}>
       <CardContent className="space-y-4">
         <FormField
           control={loginForm.control}
@@ -102,15 +110,25 @@ export function LoginForm() {
           )}
         />
       </CardContent>
-      <CardFooter className="flex justify-end mt-4 gap-2">
+      <CardFooter className="flex flex-col justify-end mt-4 gap-2">
         <Button
           type="submit"
           className="w-full"
           disabled={ isLoading() }
           >
-          {isLoading() ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : "Entrar"}
+          { isLoading()
+            &&
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />  
+          }
+          Entrar
+        </Button>
+        <Button
+          type="button"
+          className="w-full"
+          variant="outline" 
+          onClick={handleGoogleSignIn}>
+          <Image src="/google.svg" alt="Google logo" width={15} height={15} className="mr-1" />
+          Entrar com Google
         </Button>
       </CardFooter>
       </form>
