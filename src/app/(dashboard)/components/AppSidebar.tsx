@@ -1,4 +1,5 @@
-import { Separator } from "@/components/ui/separator"
+"use client";
+import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
   SidebarContent,
@@ -10,16 +11,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { CalendarDays, Gem, LayoutDashboard, Stethoscope, UsersRound } from "lucide-react"
-import Link from "next/link"
-import { Footer } from "./Footer"
-import { Header } from "./Header"
+} from "@/components/ui/sidebar";
+import { CalendarDays, Gem, LayoutDashboard, Stethoscope, UsersRound } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Footer } from "./Footer";
+import { Header } from "./Header";
 
 const items = [
   {
     title: "Dashboard",
-    url: "#",
+    url: "/dashboard",
     icon: LayoutDashboard,
   },
   {
@@ -40,6 +42,10 @@ const items = [
 ]
 
 export function AppSidebar() {
+  const pathName = usePathname()
+  function isCurrentPath(url: string) {
+    return url === pathName;
+  }
   return (
     <Sidebar className="h-screen">
       <SidebarHeader>
@@ -53,7 +59,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild isActive={isCurrentPath(item.url)} >
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
