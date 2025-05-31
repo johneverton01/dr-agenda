@@ -109,7 +109,7 @@ export const usersToClinicsTableRelations = relations(
       references: [usersTable.id],
     }),
     clinic: one(clinicsTable, {
-      fields: [usersToClinicsTable.userId],
+      fields: [usersToClinicsTable.clinicId],
       references: [clinicsTable.id],
     }),
   })
