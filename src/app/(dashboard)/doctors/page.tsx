@@ -1,3 +1,6 @@
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import {
   PageActions,
   PageContainer,
@@ -7,8 +10,18 @@ import {
   PageHeaderContent,
   PageTitle,
 } from "../components/PageTemplate";
+import { AddDoctorButton } from "./components/AddDoctorButton";
 
-export default function DoctorsPage() {
+export default async function DoctorsPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session?.user) {
+    redirect("/authentication");
+  }
+  if (!session.user.clinic) {
+    redirect("/clinic-form");
+  }
   return (
     <PageContainer>
       <PageHeader>
@@ -16,7 +29,9 @@ export default function DoctorsPage() {
           <PageTitle>Médicos</PageTitle>
           <PageDescription>Gerencie os médicos da sua clínica</PageDescription>
         </PageHeaderContent>
-        <PageActions>Action</PageActions>
+        <PageActions>
+          <AddDoctorButton />
+        </PageActions>
       </PageHeader>
       <PageContent>Conteudo</PageContent>
     </PageContainer>
