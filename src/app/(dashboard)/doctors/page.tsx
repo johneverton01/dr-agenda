@@ -11,6 +11,7 @@ import {
   PageTitle,
 } from "../components/PageTemplate";
 import { AddDoctorButton } from "./components/AddDoctorButton";
+import { ListDoctorsCard } from "./components/ListDoctorsCard";
 
 export default async function DoctorsPage() {
   const session = await auth.api.getSession({
@@ -33,7 +34,9 @@ export default async function DoctorsPage() {
           <AddDoctorButton />
         </PageActions>
       </PageHeader>
-      <PageContent>Conteudo</PageContent>
+      <PageContent>
+        <ListDoctorsCard />
+      </PageContent>
     </PageContainer>
   );
 }

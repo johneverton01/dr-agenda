@@ -1,41 +1,74 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { DialogContent, DialogFooter, DialogHeader } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
+import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
 import { z } from "zod";
 
+import { upsertDoctor } from "@/actions/upsert-doctor";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { medicalSpecialties } from "../enums";
 import { SelectTime } from "./SelectTime";
 import { SelectWeekDay } from "./SelectWeekDay";
 
-const formSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
-  specialty: z.string().min(1, "Especialidade é obrigatória"),
-  appointmentPrice: z.number().min(1, "Preço da consulta é obrigatório"),
-  availableFromWeekDay: z.string(),
-  availableToWeekDay: z.string(),
-  availableFromTime: z.string().min(1, "Horário de início é obrigatório"),
-  availableToTime: z.string().min(1, "Horário de término é obrigatório"),
-}).refine((data) => {
-  return data.availableFromWeekDay < data.availableToWeekDay
-  
-}, {
-  message: "O dia inicial deve ser anterior ao dia final",
-  path: ["availableToWeekDay"],
-}).refine((data) => {
-  return data.availableFromTime < data.availableToTime
-}, {
-  message: "O horário inicial deve ser anterior ao horário final",
-  path: ["availableToTime"],
-});
+const formSchema = z
+  .object({
+    name: z.string().min(1, "Nome é obrigatório"),
+    specialty: z.string().min(1, "Especialidade é obrigatória"),
+    appointmentPrice: z.number().min(1, "Preço da consulta é obrigatório"),
+    availableFromWeekDay: z.string(),
+    availableToWeekDay: z.string(),
+    availableFromTime: z.string().min(1, "Horário de início é obrigatório"),
+    availableToTime: z.string().min(1, "Horário de término é obrigatório"),
+  })
+  .refine(
+    (data) => {
+      return data.availableFromWeekDay < data.availableToWeekDay;
+    },
+    {
+      message: "O dia inicial deve ser anterior ao dia final",
+      path: ["availableToWeekDay"],
+    }
+  )
+  .refine(
+    (data) => {
+      return data.availableFromTime < data.availableToTime;
+    },
+    {
+      message: "O horário inicial deve ser anterior ao horário final",
+      path: ["availableToTime"],
+    }
+  );
 
-export function UpsertDoctorForm() {
+  interface UpsertDoctorFormProps {
+    onSuccess: () => void;
+  }
+
+export function UpsertDoctorForm({ onSuccess }: UpsertDoctorFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,10 +81,31 @@ export function UpsertDoctorForm() {
       availableToTime: "",
     },
   });
-  function handleSubmit(data: z.infer<typeof formSchema>) {
-    console.log("Form submitted with data:", data);
-    // Here you would typically handle the form submission, e.g., send data to an API
+
+  const upsertDoctorAction = useAction(upsertDoctor, {
+    onSuccess: () => {
+      toast.success("Médico adicionado com sucesso!");
+      form.reset();
+      onSuccess();
+    },
+    onError: () => {
+      toast.error(`Erro ao adicionar médico`);
+    },
+  });
+
+  function isLoading() {
+    return upsertDoctorAction.isPending;
   }
+
+  function handleSubmit(data: z.infer<typeof formSchema>) {
+    upsertDoctorAction.execute({
+      ...data,
+      availableFromWeekDay: parseInt(data.availableFromWeekDay),
+      availableToWeekDay: parseInt(data.availableToWeekDay),
+      appointmentPriceInCents: data.appointmentPrice * 100,
+    });
+  }
+
   return (
     <DialogContent>
       <DialogHeader>
@@ -216,7 +270,8 @@ export function UpsertDoctorForm() {
             )}
           />
           <DialogFooter>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isLoading()}>
+              {isLoading() && <Loader2 className="h-4 w-4 animate-spin" />}
               Adicionar
             </Button>
           </DialogFooter>

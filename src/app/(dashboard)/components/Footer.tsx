@@ -9,6 +9,13 @@ import { redirect } from "next/navigation";
 
 export function Footer() {
   const session = authClient.useSession();
+  if (!session.data?.user) {
+    return null; // or handle unauthenticated state
+  }
+  if (!session.data?.user.clinic) {
+    return null; // or handle missing clinic state
+  }
+
   function handleSignOut() {
       authClient.signOut({
         fetchOptions: {
@@ -18,6 +25,7 @@ export function Footer() {
         }
       });
     }
+    
   return (
     <SidebarMenu>
       <SidebarMenuItem>
