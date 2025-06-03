@@ -10,6 +10,7 @@ import { formatCurrencyInCents } from "@/helpers/currency";
 import { CalendarDays, Clock, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { getAvailability } from "../helpers/availability";
+import { DeleteDoctor } from "./DeleteDoctor";
 import { UpsertDoctorForm } from "./UpsertDoctorForm";
 
 interface DoctorCardProps {
@@ -73,9 +74,7 @@ export function DoctorCard({
       </CardContent>
       <Separator className="w-full" />
       <CardFooter className="flex flex-col gap-2 justify-between items-center px-0">
-        <Button variant="outline" className="w-full">
-          Deletar Médico
-        </Button>
+        <DeleteDoctor doctor={doctor} />
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
               <Button className="w-full">
