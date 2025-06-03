@@ -76,13 +76,20 @@ export function DoctorCard({
         <Button variant="outline" className="w-full">
           Deletar Médico
         </Button>
-        <Dialog>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
               <Button className="w-full">
                 Ver detalhes
               </Button>
             </DialogTrigger>
-            <UpsertDoctorForm onSuccess={() => setIsOpen(false)}/>
+            <UpsertDoctorForm
+              doctor={{
+                ...doctor,
+                availableToTime: availability.to.format("HH:mm:ss"),
+                availableFromTime: availability.from.format("HH:mm:ss"),
+              }}
+              onSuccess={() => setIsOpen(false)}
+            />
         </Dialog>
       </CardFooter>
     </Card>

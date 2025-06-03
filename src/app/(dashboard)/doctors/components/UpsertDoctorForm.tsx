@@ -29,6 +29,7 @@ import { NumericFormat } from "react-number-format";
 import { z } from "zod";
 
 import { upsertDoctor } from "@/actions/upsert-doctor";
+import { doctorsTable } from "@/db/schema";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { medicalSpecialties } from "../enums";
@@ -65,31 +66,32 @@ const formSchema = z
   );
 
   interface UpsertDoctorFormProps {
+    doctor?: typeof doctorsTable.$inferSelect;
     onSuccess: () => void;
   }
 
-export function UpsertDoctorForm({ onSuccess }: UpsertDoctorFormProps) {
+export function UpsertDoctorForm({ doctor, onSuccess }: UpsertDoctorFormProps) {
+  console.log("UpsertDoctorForm", doctor);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      specialty: "",
-      appointmentPrice: 0,
-      availableFromWeekDay: "1",
-      availableToWeekDay: "5",
-      availableFromTime: "",
-      availableToTime: "",
+      name: doctor?.name || "",
+      specialty: doctor?.specialty || "",
+      appointmentPrice: doctor?.appointmentPriceInCents ?  doctor?.appointmentPriceInCents / 100 : 0,
+      availableFromWeekDay: doctor?.availableFromWeekDay.toString() || "1",
+      availableToWeekDay: doctor?.availableToWeekDay.toString() || "5",
+      availableFromTime: doctor?.availableFromTime || "",
+      availableToTime: doctor?.availableToTime || "",
     },
   });
 
   const upsertDoctorAction = useAction(upsertDoctor, {
     onSuccess: () => {
-      toast.success("Médico adicionado com sucesso!");
-      form.reset();
+      toast.success(doctor ? "Médico editado com sucesso!" : "Médico adicionado com sucesso!");
       onSuccess();
     },
     onError: () => {
-      toast.error(`Erro ao adicionar médico`);
+      toast.error(doctor ? "Erro ao editar médico" : "Erro ao adicionar médico");
     },
   });
 
@@ -100,6 +102,7 @@ export function UpsertDoctorForm({ onSuccess }: UpsertDoctorFormProps) {
   function handleSubmit(data: z.infer<typeof formSchema>) {
     upsertDoctorAction.execute({
       ...data,
+      id: doctor?.id,
       availableFromWeekDay: parseInt(data.availableFromWeekDay),
       availableToWeekDay: parseInt(data.availableToWeekDay),
       appointmentPriceInCents: data.appointmentPrice * 100,
@@ -109,9 +112,10 @@ export function UpsertDoctorForm({ onSuccess }: UpsertDoctorFormProps) {
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Adicionar Médico</DialogTitle>
+        <DialogTitle>{doctor ? doctor.name : 'Adicionar um nobo médico'}</DialogTitle>
         <DialogDescription>
-          Adicione um novo médico à sua clínica
+          {doctor ? "Edite as informações desse médico." : 'Adicione um novo médico à sua clínica'}
+          
         </DialogDescription>
       </DialogHeader>
       <Form {...form}>
@@ -272,7 +276,7 @@ export function UpsertDoctorForm({ onSuccess }: UpsertDoctorFormProps) {
           <DialogFooter>
             <Button type="submit" className="w-full" disabled={isLoading()}>
               {isLoading() && <Loader2 className="h-4 w-4 animate-spin" />}
-              Adicionar
+              {doctor ? "Atualizar Médico" : "Adicionar Médico"}
             </Button>
           </DialogFooter>
         </form>
