@@ -88,6 +88,7 @@ export function DoctorCard({
                 availableFromTime: availability.from.format("HH:mm:ss"),
               }}
               onSuccess={() => setIsOpen(false)}
+              isOpen={isOpen}
             />
         </Dialog>
       </CardFooter>

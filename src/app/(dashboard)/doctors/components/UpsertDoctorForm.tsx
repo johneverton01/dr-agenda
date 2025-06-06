@@ -31,6 +31,7 @@ import { z } from "zod";
 import { upsertDoctor } from "@/actions/upsert-doctor";
 import { doctorsTable } from "@/db/schema";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { medicalSpecialties } from "../enums";
 import { SelectTime } from "./SelectTime";
@@ -67,22 +68,25 @@ const formSchema = z
 
   interface UpsertDoctorFormProps {
     doctor?: typeof doctorsTable.$inferSelect;
+    isOpen?: boolean;
     onSuccess: () => void;
   }
 
-export function UpsertDoctorForm({ doctor, onSuccess }: UpsertDoctorFormProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    shouldUnregister: true,
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: doctor?.name || "",
+export function UpsertDoctorForm({ doctor, isOpen, onSuccess }: UpsertDoctorFormProps) {
+  const formDefaultValues = {
+    name: doctor?.name || "",
       specialty: doctor?.specialty || "",
       appointmentPrice: doctor?.appointmentPriceInCents ?  doctor?.appointmentPriceInCents / 100 : 0,
       availableFromWeekDay: doctor?.availableFromWeekDay.toString() || "1",
       availableToWeekDay: doctor?.availableToWeekDay.toString() || "5",
       availableFromTime: doctor?.availableFromTime || "",
       availableToTime: doctor?.availableToTime || "",
-    },
+  }
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    shouldUnregister: true,
+    resolver: zodResolver(formSchema),
+    defaultValues: formDefaultValues
   });
 
   const upsertDoctorAction = useAction(upsertDoctor, {
@@ -108,6 +112,12 @@ export function UpsertDoctorForm({ doctor, onSuccess }: UpsertDoctorFormProps) {
       appointmentPriceInCents: data.appointmentPrice * 100,
     });
   }
+
+  useEffect(() => {
+    if (isOpen) {
+      form.reset(formDefaultValues);
+    }
+  }, [isOpen, form, doctor])
 
   return (
     <DialogContent>
