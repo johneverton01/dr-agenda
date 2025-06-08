@@ -1,10 +1,63 @@
-export default function appointmentsPage() {
+import { db } from "@/db";
+import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
+import { auth } from "@/lib/auth";
+import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+
+import { DataTable } from "@/components/ui/DataTable";
+import {
+  PageActions,
+  PageContainer,
+  PageContent,
+  PageDescription,
+  PageHeader,
+  PageHeaderContent,
+  PageTitle,
+} from "../components/PageTemplate";
+import { AddAppointmentButton } from "./components/AddAppointmentButton";
+import { appointmentsTableColumns } from "./components/TableColumns";
+
+export default async function appointmentsPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session?.user) {
+    redirect("/authentication");
+  }
+  if (!session.user.clinic) {
+    redirect("/clinic-form");
+  }
+
+  const [patients, doctors, appointments] = await Promise.all([
+    db.query.patientsTable.findMany({
+      where: eq(patientsTable.clinicId, session.user.clinic.id),
+    }),
+    db.query.doctorsTable.findMany({
+      where: eq(doctorsTable.clinicId, session.user.clinic.id),
+    }),
+    db.query.appointmentsTable.findMany({
+      where: eq(appointmentsTable.clinicId, session.user.clinic.id),
+      with: {
+        patient: true,
+        doctor: true,
+      },
+    }),
+  ]);
   return (
-    <div className="flex h-full w-full items-center justify-center">
-      <div className="flex flex-col items-center justify-center gap-6">
-        <h1 className="text-2xl font-bold">appointments</h1>
-        <p>Welcome to the doctors page!</p>
-      </div>
-    </div>
+    <PageContainer>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageTitle>Agendamentos</PageTitle>
+          <PageDescription>Gerencie as consultas dos médicos</PageDescription>
+        </PageHeaderContent>
+        <PageActions>
+          <AddAppointmentButton patients={patients} doctors={doctors}/>
+        </PageActions>
+      </PageHeader>
+      <PageContent>
+        <DataTable columns={appointmentsTableColumns} data={appointments} />
+      </PageContent>
+    </PageContainer>
   );
 }

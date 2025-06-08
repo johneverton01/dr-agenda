@@ -1,4 +1,4 @@
-import { deleteDoctor } from "@/actions/delect-doctor";
+import { deleteDoctor } from "@/actions/delete-doctor";
 import {
   AlertDialog,
   AlertDialogAction,

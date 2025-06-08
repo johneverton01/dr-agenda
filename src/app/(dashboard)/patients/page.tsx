@@ -1,3 +1,4 @@
+import { DataTable } from "@/components/ui/DataTable";
 import { db } from "@/db";
 import { patientsTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
@@ -14,7 +15,6 @@ import {
   PageTitle,
 } from "../components/PageTemplate";
 import { AddPatientsButton } from "./components/AddPatientsButton";
-import { DataTable } from "./components/DataTable";
 import { patientsTableColumns } from "./components/TableColumns";
 
 export default async function DoctorsPage() {
