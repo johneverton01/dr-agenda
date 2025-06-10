@@ -12,6 +12,7 @@ import {
   PageHeaderContent,
   PageTitle,
 } from "../components/PageTemplate";
+import { AppointmentsChats } from "./components/AppointmentsChart";
 import { DatePicker } from "./components/DatePicker";
 import { StatsCards } from "./components/StatsCards";
 
@@ -80,6 +81,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           totalPatients={totalPatients.total}
           totalDoctors={totalDoctors.total}
         />
+
+        <div className="grig grid-cols-[2.25fr_1fr] gap-4">
+          <AppointmentsChats dailyAppointmentsData={dailyAppointmentsData} />
+        </div>
       </PageContent>
     </PageContainer>
   );
