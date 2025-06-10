@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import dayjs from "dayjs";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { appointmentsTableColumns } from "../appointments/components/TableColumns";
 import {
   PageActions,
   PageContainer,
@@ -12,10 +13,12 @@ import {
   PageHeaderContent,
   PageTitle,
 } from "../components/PageTemplate";
+import { AppointmentsByDays } from "./components/AppointmentsByDays";
 import { AppointmentsChats } from "./components/AppointmentsChart";
 import { DatePicker } from "./components/DatePicker";
 import { StatsCards } from "./components/StatsCards";
 import { TopDoctors } from "./components/TopDoctors";
+import { TopSpecialties } from "./components/TopSpecialties";
 
 interface DashboardPageProps {
   searchParams: Promise<{
@@ -88,6 +91,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <TopDoctors
             doctors={topDoctors}
           />
+        </div>
+        <div className="grid grid-cols-[2.25fr_1fr] gap-4">
+          <AppointmentsByDays 
+            todayAppointments={todayAppointments}
+            appointmentsTableColumns={appointmentsTableColumns} 
+          />
+          <TopSpecialties topSpecialties={topSpecialties} />
         </div>
       </PageContent>
     </PageContainer>
