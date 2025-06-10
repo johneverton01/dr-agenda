@@ -1,4 +1,6 @@
+import { getDashboard } from "@/data/getDashboards";
 import { auth } from "@/lib/auth";
+import dayjs from "dayjs";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
@@ -11,8 +13,16 @@ import {
   PageTitle,
 } from "../components/PageTemplate";
 import { DatePicker } from "./components/DatePicker";
+import { StatsCards } from "./components/StatsCards";
 
-export default async function DashboardPage() {
+interface DashboardPageProps {
+  searchParams: Promise<{
+    from: string;
+    to: string;
+  }>;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -25,6 +35,33 @@ export default async function DashboardPage() {
     redirect("/clinic-form");
   }
 
+   const { from, to } = await searchParams;
+  if (!from || !to) {
+    redirect(
+      `/dashboard?from=${dayjs().format("YYYY-MM-DD")}&to=${dayjs().add(1, "month").format("YYYY-MM-DD")}`,
+    );
+  }
+  const {
+    totalRevenue,
+    totalAppointments,
+    totalPatients,
+    totalDoctors,
+    topDoctors,
+    topSpecialties,
+    todayAppointments,
+    dailyAppointmentsData,
+  } = await getDashboard({
+    from,
+    to,
+    session: {
+      user: {
+        clinic: {
+          id: session.user.clinic.id,
+        },
+      },
+    },
+  });
+
   return (
     <PageContainer>
       <PageHeader>
@@ -36,7 +73,14 @@ export default async function DashboardPage() {
           <DatePicker />
         </PageActions>
       </PageHeader>
-      <PageContent>content</PageContent>
+      <PageContent>
+        <StatsCards
+          totalRevenue={totalRevenue.total ? Number(totalRevenue.total) : null}
+          totalAppointments={totalAppointments.total}
+          totalPatients={totalPatients.total}
+          totalDoctors={totalDoctors.total}
+        />
+      </PageContent>
     </PageContainer>
   );
 }
