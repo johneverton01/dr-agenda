@@ -75,10 +75,10 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <Link href="/planos">
+                  <SidebarMenuButton asChild isActive={isCurrentPath('/subscriptions')} className="data-active-[true]:bg-blue-50">
+                    <Link href="/subscriptions">
                       <Gem />
-                      <span>Planos</span>
+                      <span>Assinaturas</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
