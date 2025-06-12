@@ -24,6 +24,7 @@ export const auth = betterAuth({
         where: eq(usersToClinicsTable.userId, user.id),
         with: {
           clinic: true,
+          user: true,
         },
       });
       // TODO: Ao adaptar para o usuário ter múltiplas clínicas, deve-se mudar esse código
@@ -31,6 +32,7 @@ export const auth = betterAuth({
       return {
         user: {
           ...user,
+          plan: clinic?.user.plan,
           clinic: clinic?.clinicId
             ? {
                 id: clinic?.clinicId,
